@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(python3:*)",
+      "Bash(if [ -f /Users/harishvanka/Downloads/scm/nf-check/cookies.txt ])",
+      "Bash(then cp /Users/harishvanka/Downloads/scm/nf-check/cookies.txt /Users/harishvanka/Downloads/scm/nf-check/cookies/cookies.txt)",
+      "Bash(fi)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Netflix Title Lookup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <div class="top">
+      <h1>Netflix Title Lookup</h1>
+    </div>
+    <main class="card">
+      <form action="{{ url_for('main.lookup') }}" method="post">
+        <label class="muted" for="netflix-url">Enter Netflix title URL or ID</label>
+        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+          <input id="netflix-url" name="url" placeholder="https://www.netflix.com/title/80192098" style="flex:1;padding:0.75rem;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text-primary);" />
+          <button class="pill" type="submit" style="padding:0.75rem 1rem;">Lookup</button>
+        </div>
+      </form>
+      {% if error %}
+        <div class="summary" style="margin-top:1rem;color:var(--error);">{{ error }}</div>
+      {% endif %}
+      <div style="margin-top:1.5rem;color:var(--text-subtle);">This tool scans the Netflix title page for keywords like HDR, Dolby Vision and Atmos. For best results place a cookies.txt in the working directory if you are signed into Netflix.</div>
+    </main>
+  </body>
+  </html>

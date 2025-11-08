@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Lookup Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <div class="top">
+      <div class="logo">
+        <div class="logo-icon">N</div>
+        <span>Netflix Title Lookup</span>
+      </div>
+      <a href="{{ url_for('main.index') }}" class="back">← Back to search</a>
+    </div>
+
+    <section class="card hero">
+      <div class="posterWrap">
+        {% if data.poster %}
+          <img class="poster" src="{{ data.poster }}" alt="Poster for {{ data.title or data.id }}" loading="lazy" />
+        {% else %}
+          <div style="padding:2rem;color:var(--text-subtle);display:flex;align-items:center;justify-content:center;min-height:400px;">No poster available</div>
+        {% endif %}
+      </div>
+
+      <div class="content">
+        <div class="header">
+          <div>
+            <h1>{{ data.title or ('Title ID: ' + data.id) }}</h1>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+            {% if data.max_resolution_label %}
+            <div class="pill ok">{{ data.max_resolution_label }}</div>
+            {% endif %}
+            <div class="pill {% if data.dolby_vision %}ok{% else %}bad{% endif %}">Dolby Vision: {{ 'Yes' if data.dolby_vision else 'No' }}</div>
+            <div class="pill {% if data.hdr %}ok{% else %}bad{% endif %}">HDR10: {{ 'Yes' if data.hdr else 'No' }}</div>
+            <div class="pill {% if data.atmos %}ok{% else %}bad{% endif %}">Dolby Atmos: {{ 'Yes' if data.atmos else 'No' }}</div>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div>
+            <div class="label">Title ID</div>
+            <div class="value">{{ data.id }}</div>
+          </div>
+          {% if data.year %}
+          <div>
+            <div class="label">Release Year</div>
+            <div class="value">{{ data.year }}</div>
+          </div>
+          {% endif %}
+          <div>
+            <div class="label">Resolution</div>
+            <div class="value">{{ data.max_resolution_label or '—' }}</div>
+          </div>
+        </div>
+
+        <h3>Title Info</h3>
+        <div class="summary summary-grid">
+          <div class="kv">
+            <span class="k">{{ data.max_resolution_label or 'Resolution' }}</span>
+            <span class="v"><span class="val-badge val-{% if data.max_resolution_label %}true{% else %}false{% endif %}">{{ 'True' if data.max_resolution_label else 'False' }}</span></span>
+          </div>
+          <div class="kv">
+            <span class="k">HD</span>
+            <span class="v"><span class="val-badge val-{% if data.hdr or data.uhd %}true{% else %}false{% endif %}">{{ 'True' if data.hdr or data.uhd else 'False' }}</span></span>
+          </div>
+          <div class="kv">
+            <span class="k">SD</span>
+            <span class="v"><span class="val-badge val-true">True</span></span>
+          </div>
+          <div class="kv">
+            <span class="k">Dolby Vision</span>
+            <span class="v"><span class="val-badge val-{% if data.dolby_vision %}true{% else %}false{% endif %}">{{ 'True' if data.dolby_vision else 'False' }}</span></span>
+          </div>
+          <div class="kv">
+            <span class="k">HDR10+</span>
+            <span class="v"><span class="val-badge val-false">False</span></span>
+          </div>
+          <div class="kv">
+            <span class="k">HDR10</span>
+            <span class="v"><span class="val-badge val-{% if data.hdr %}true{% else %}false{% endif %}">{{ 'True' if data.hdr else 'False' }}</span></span>
+          </div>
+          <div class="kv">
+            <span class="k">Dolby Atmos</span>
+            <span class="v"><span class="val-badge val-{% if data.atmos %}true{% else %}false{% endif %}">{{ 'True' if data.atmos else 'False' }}</span></span>
+          </div>
+          <div class="kv">
+            <span class="k">Spatial Audio</span>
+            <span class="v"><span class="val-badge val-{% if data.spatial_audio %}true{% else %}false{% endif %}">{{ 'True' if data.spatial_audio else 'False' }}</span></span>
+          </div>
+          <div class="kv">
+            <span class="k">5.1 Dolby</span>
+            <span class="v"><span class="val-badge val-{% if data.dolby_digital %}true{% else %}false{% endif %}">{{ 'True' if data.dolby_digital else 'False' }}</span></span>
+          </div>
+        </div>
+
+        {% if warning %}
+        <div class="summary" style="margin-top:1.5rem;color:var(--text-muted);white-space:pre-line;">
+          <h3 style="color:var(--text-secondary);margin-bottom:0.75rem;">Note</h3>
+          {{ warning }}
+        </div>
+        {% endif %}
+
+        {% if data.video_tracks %}
+        <div class="summary">
+          <h3 style="margin-bottom:1rem;color:var(--text-primary);">Video Tracks ({{ data.video_tracks|length }})</h3>
+          <div style="max-height:300px;overflow-y:auto;">
+            {% for track in data.video_tracks[:10] %}
+            <div class="kv" style="font-size:0.9rem;padding:0.5rem 0;">
+              <span style="color:var(--text-secondary);">{{ track.format }} - {{ track.width }}x{{ track.height }}</span>
+              <span style="color:var(--text-muted);font-size:0.85rem;">{{ (track.bitrate / 1000)|round(1) }}Mbps</span>
+            </div>
+            {% endfor %}
+            {% if data.video_tracks|length > 10 %}
+            <div class="muted" style="padding:0.5rem 0;">+{{ data.video_tracks|length - 10 }} more</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if data.audio_tracks %}
+        <div class="summary">
+          <h3 style="margin-bottom:1rem;color:var(--text-primary);">Audio Tracks ({{ data.audio_tracks|length }})</h3>
+          <div style="max-height:300px;overflow-y:auto;">
+            {% for track in data.audio_tracks[:10] %}
+            <div class="kv" style="font-size:0.9rem;padding:0.5rem 0;">
+              <span style="color:var(--text-secondary);">{{ track.language or 'Unknown' }} - {{ track.format }}</span>
+              <span style="color:var(--text-muted);font-size:0.85rem;">{{ track.codec or '—' }}</span>
+            </div>
+            {% endfor %}
+            {% if data.audio_tracks|length > 10 %}
+            <div class="muted" style="padding:0.5rem 0;">+{{ data.audio_tracks|length - 10 }} more</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+  </body>
+</html>

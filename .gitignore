@@ -1,0 +1,51 @@
+# Netflix Format Checker - Git Ignore
+
+# Sensitive files - DO NOT COMMIT
+cookies/cookies.txt
+cookies.txt
+config.py
+*.wvd
+
+# Cache and temporary files
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# MSL keys cache
+.cache/msl_keys.json
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Flask
+instance/
+.webassets-cache
+
+# Environment variables
+.env
+.env.local
