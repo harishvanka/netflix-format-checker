@@ -88,8 +88,8 @@
 
             {% if data.sd %}
             <div class="format-chip format-chip-resolution">
-              <img class="format-icon-img" src="{{ url_for('static', filename='images/sd.png') }}" alt="SD">
-              <span>SD (480p)</span>
+              <img class="format-icon-img" src="{{ url_for('static', filename='images/sd.png') }}" alt="SDR">
+              <span>SDR (Standard Dynamic Range)</span>
             </div>
             {% endif %}
 
@@ -142,8 +142,8 @@
             <span class="v"><span class="val-badge val-{% if data.hdr or data.uhd %}true{% else %}false{% endif %}">{{ 'True' if data.hdr or data.uhd else 'False' }}</span></span>
           </div>
           <div class="kv">
-            <span class="k">SD</span>
-            <span class="v"><span class="val-badge val-true">True</span></span>
+            <span class="k">SDR (Standard Dynamic Range)</span>
+            <span class="v"><span class="val-badge val-{% if data.sd %}true{% else %}false{% endif %}">{{ 'True' if data.sd else 'False' }}</span></span>
           </div>
           <div class="kv">
             <span class="k">Dolby Vision</span>
