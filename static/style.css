@@ -568,6 +568,218 @@
       filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
     }
 
+    /* Availability Badge */
+    .availability-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      border: 1px solid;
+    }
+
+    .availability-badge.available {
+      background: rgba(34, 197, 94, 0.1);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: #86efac;
+    }
+
+    .availability-badge.unavailable {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    /* Coming Soon Notice */
+    .coming-soon-notice {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      color: #93c5fd;
+    }
+
+    .icon-small {
+      width: 2rem;
+      height: 2rem;
+      flex-shrink: 0;
+      color: inherit;
+    }
+
+    .coming-soon-title {
+      font-weight: 700;
+      color: #93c5fd;
+      margin-bottom: 0.25rem;
+    }
+
+    .coming-soon-date {
+      font-size: 0.9rem;
+      color: rgba(147, 197, 253, 0.8);
+    }
+
+    /* Playback Container with Elliptic Wrap */
+    .playback-container {
+      margin: 1.5rem 0;
+    }
+
+    .playback-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    /* Format Chips with Icons */
+    .format-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: var(--backdrop-blur);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 9999px;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+      width: fit-content;
+    }
+
+    .format-chip::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    }
+
+    .format-chip:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .format-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    .format-chip:hover .format-icon {
+      transform: scale(1.1);
+    }
+
+    /* Image-based format icons (4K, Full HD) */
+    .format-icon-img {
+      width: 2.5rem;
+      height: auto;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      object-fit: contain;
+    }
+
+    .format-chip:hover .format-icon-img {
+      transform: scale(1.08);
+      filter: brightness(1.1);
+    }
+
+    /* Highlight 4K/UHD Chip */
+    .playback-chips .format-chip:first-child {
+      background: rgba(59, 130, 246, 0.08);
+      border-color: rgba(59, 130, 246, 0.25);
+    }
+
+    .playback-chips .format-chip:first-child:hover {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.35);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .playback-chips .format-chip:first-child .format-icon {
+      color: #60a5fa;
+    }
+
+    .format-chip-resolution {
+      background: rgba(59, 130, 246, 0.08);
+      border-color: rgba(59, 130, 246, 0.25);
+    }
+
+    .format-chip-resolution:hover {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.35);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .format-chip-hdr {
+      background: rgba(168, 85, 247, 0.08);
+      border-color: rgba(168, 85, 247, 0.25);
+    }
+
+    .format-chip-hdr:hover {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: rgba(168, 85, 247, 0.35);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .format-chip-dolby-vision {
+      background: rgba(168, 85, 247, 0.08);
+      border-color: rgba(168, 85, 247, 0.25);
+    }
+
+    .format-chip-dolby-vision:hover {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: rgba(168, 85, 247, 0.35);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .format-chip-atmos {
+      background: rgba(236, 72, 153, 0.08);
+      border-color: rgba(236, 72, 153, 0.25);
+    }
+
+    .format-chip-atmos:hover {
+      background: rgba(236, 72, 153, 0.15);
+      border-color: rgba(236, 72, 153, 0.35);
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .format-chip-dolby-digital {
+      background: rgba(34, 197, 94, 0.08);
+      border-color: rgba(34, 197, 94, 0.25);
+    }
+
+    .format-chip-dolby-digital:hover {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.35);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .format-chip-spatial-audio {
+      background: rgba(34, 211, 238, 0.08);
+      border-color: rgba(34, 211, 238, 0.25);
+    }
+
+    .format-chip-spatial-audio:hover {
+      background: rgba(34, 211, 238, 0.15);
+      border-color: rgba(34, 211, 238, 0.35);
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       body {
@@ -621,6 +833,15 @@
 
       h1 {
         font-size: 1.5rem;
+      }
+
+      .playback-chips {
+        gap: 0.5rem;
+      }
+
+      .format-chip {
+        font-size: 0.8rem;
+        padding: 0.6rem 1rem;
       }
     }
 

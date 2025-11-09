@@ -105,14 +105,17 @@ def lookup():
 
         logger.info(f"Analysis complete: DV={analysis.get('dolby_vision')}, HDR={analysis.get('hdr10')}, Atmos={analysis.get('atmos')}")
 
-        # Determine resolution label from uhd flag
+        # Determine resolution label from analysis data
         max_resolution_label = None
         if analysis.get('uhd'):
             max_resolution_label = 'UHD (4K)'
         elif analysis.get('hd'):
             max_resolution_label = 'FHD (1080p)'
+        elif analysis.get('available'):
+            # If we know it's available but no specific resolution detected, assume at least SD
+            max_resolution_label = None
         else:
-            max_resolution_label = 'SD (480p)'
+            max_resolution_label = None
 
         # Convert analysis to template format
         data = {
@@ -122,13 +125,19 @@ def lookup():
             'poster': analysis.get('poster'),
             'dolby_vision': analysis.get('dolby_vision', False),
             'hdr': analysis.get('hdr10', False),
+            'hd': analysis.get('hd', False),
             'atmos': analysis.get('atmos', False),
             'dolby_digital': analysis.get('dolby_digital', False),
             'spatial_audio': analysis.get('spatial_audio', False),
             'uhd': analysis.get('uhd', False),
             'max_resolution_label': max_resolution_label,
             'video_tracks': [],
-            'audio_tracks': []
+            'audio_tracks': [],
+            # Availability status
+            'is_available': analysis.get('is_available', True),
+            'availability_status': analysis.get('availability_status', 'Available'),
+            'coming_date': analysis.get('coming_date', None),
+            'is_series': analysis.get('is_series', False)
         }
 
         # Build simple format list

@@ -129,6 +129,61 @@ class PosterFetcher:
             logger.debug(f"IMDb search failed: {e}")
             return None
 
+    def _extract_year_from_imdb(self, title: str, year: Optional[int] = None) -> Optional[int]:
+        """
+        Extract release year from IMDb title page
+
+        :param title: Movie/TV show title
+        :param year: Optional hint year (not used in extraction, only for searching)
+        :return: Release year or None
+        """
+        try:
+            # Build search query
+            query = title
+            if year:
+                query = f"{title} {year}"
+
+            # Use IMDb search URL
+            search_url = f"https://www.imdb.com/find?q={quote(query)}&s=tt"
+
+            response = self.session.get(search_url, timeout=self.timeout)
+            response.raise_for_status()
+
+            # Get first IMDb result
+            match = re.search(r'/title/(tt\d+)/', response.text)
+            if not match:
+                return None
+
+            imdb_id = match.group(1)
+
+            # Fetch the title page
+            title_url = f"https://www.imdb.com/title/{imdb_id}/"
+            title_response = self.session.get(title_url, timeout=self.timeout)
+            title_response.raise_for_status()
+
+            # Try multiple patterns to extract year
+            patterns = [
+                r'"releaseYear"\s*:\s*(\d{4})',
+                r'"datePublished"\s*:\s*"(\d{4})',
+                r'"birthDate"\s*:\s*"(\d{4})',
+                r'<span>(\d{4})</span>',
+            ]
+
+            for pattern in patterns:
+                year_match = re.search(pattern, title_response.text)
+                if year_match:
+                    extracted_year = int(year_match.group(1))
+                    # Filter unrealistic years (prevent matching years like 1918 from currency data)
+                    if 1900 <= extracted_year <= 2100:
+                        logger.debug(f"Extracted year {extracted_year} from IMDb for '{title}'")
+                        return extracted_year
+
+            return None
+
+        except Exception as e:
+            logger.debug(f"IMDb year extraction failed: {e}")
+            return None
+
     def _find_matching_result_by_year(self, search_html: str, year: int) -> Optional[str]:
         r"""
         Find IMDb ID from search results that matches the given year
@@ -164,18 +219,24 @@ class PosterFetcher:
 
     def get_poster_info(self, title: str, year: Optional[int] = None) -> dict:
         """
-        Get detailed poster information
+        Get detailed poster information including year extraction from IMDb
 
         :param title: Movie/TV show title
         :param year: Optional release year
-        :return: Dictionary with poster info or empty dict
+        :return: Dictionary with poster info (url, title, year, source) or empty dict
         """
         try:
             poster_url = self.fetch_poster(title, year)
             if poster_url:
+                # Try to extract year from IMDb page if not provided
+                extracted_year = year
+                if not extracted_year:
+                    extracted_year = self._extract_year_from_imdb(title, year)
+
                 return {
                     'poster_url': poster_url,
                     'title': title,
+                    'year': extracted_year,
                     'source': 'imdb'
                 }
             return {}

@@ -62,7 +62,11 @@ class NetflixScraper:
             'spatial_audio': False,
             'uhd': False,
             '4k': False,
-            'hd': False
+            'hd': False,
+            'is_available': True,
+            'availability_status': 'Available',
+            'coming_date': None,
+            'is_series': False
         }
 
         try:
@@ -89,6 +93,15 @@ class NetflixScraper:
                 self._cached_year = result['year']
 
             result['poster'] = self._extract_poster(html, title_id)
+
+            # If year was populated by IMDb fetcher, update the result
+            if hasattr(self, '_cached_year') and self._cached_year and not result['year']:
+                result['year'] = self._cached_year
+                print(f"Updated year from IMDb: {result['year']}")
+
+            # Extract availability and content type information
+            self._extract_availability(html, result)
+            self._extract_content_type(html, result)
 
             # Method 1: Extract from embedded JSON data (most accurate)
             json_found = self._extract_from_json(html, result, title_id)
@@ -246,9 +259,35 @@ class NetflixScraper:
         return None
 
     def _extract_year(self, html, title_id=None):
-        """Extract release year from HTML, preferring year near title"""
+        """Extract release year from HTML, preferring most reliable sources first"""
         try:
-            # Try span.year pattern (from Netflix HTML display)
+            # Priority 0: Try to extract year near the actual title name (most reliable for collection pages)
+            # This handles cases where Netflix pages show multiple titles with different release years
+            if hasattr(self, '_cached_title') and self._cached_title:
+                title = self._cached_title
+                # Escape special regex characters in title
+                escaped_title = re.escape(title)
+
+                # Look for "title":"EXACT_TITLE" followed by releaseYear within 500 chars
+                # Use a broader search window for better accuracy
+                pattern = rf'"title"\s*:\s*"{escaped_title}"[^}}{{]*"releaseYear"\s*(?:\{{"?\$type"?:?"atom",?"?value"?:)?(\d{{4}})'
+                matches = list(re.finditer(pattern, html, re.IGNORECASE | re.DOTALL))
+                if matches:
+                    # Use the last match (most likely to be the main title when page shows related titles)
+                    year = int(matches[-1].group(1))
+                    print(f"Found year from title-matched releaseYear: {year}")
+                    return year
+
+            # Priority 1: Try JSON-LD dateCreated (Netflix) - MOST RELIABLE
+            # Format: "dateCreated": "2025-11-13"
+            # This is the JSON-LD schema that Netflix provides
+            match = re.search(r'"dateCreated"\s*:\s*"(\d{4})-', html)
+            if match:
+                year = int(match.group(1))
+                print(f"Found year from JSON-LD dateCreated: {year}")
+                return year
+
+            # Priority 2: Try span.year pattern (from Netflix HTML display)
             # Pattern: <span class="year">(YYYY)</span>
             match = re.search(r'<span class="year">\((\d{4})\)</span>', html)
             if match:
@@ -256,37 +295,41 @@ class NetflixScraper:
                 print(f"Found year from HTML: {year}")
                 return year
 
-            # For collections with multiple titles, look for releaseYear after the title name
-            # First, extract the title we're looking for
-            if hasattr(self, '_cached_title') and self._cached_title:
-                title = self._cached_title
-                # Escape special regex characters in title
-                escaped_title = re.escape(title)
-                # Look for "title":"EXACT_TITLE" followed by releaseYear within 200 chars
-                pattern = rf'"title"\s*:\s*"{escaped_title}"[^}}{{]*"releaseYear"\s*:\s*(\d{{4}})'
-                match = re.search(pattern, html)
-                if match:
-                    year = int(match.group(1))
-                    print(f"Found year from JSON (near title): {year}")
-                    return year
-
-            # Try JSON pattern: "releaseYear": YYYY (general search)
-            match = re.search(r'"releaseYear":\s*(\d{4})', html)
-            if match:
-                year = int(match.group(1))
-                print(f"Found year from JSON: {year}")
+            # Priority 3: Try JSON pattern: "releaseYear": YYYY (general search, get the LAST match)
+            # When multiple titles are shown on a page, the last releaseYear is usually the main title
+            matches = list(re.finditer(r'"releaseYear"\s*(?:\{{"?\$type"?:?"atom",?"?value"?:)?(\d{4})', html))
+            if matches:
+                year = int(matches[-1].group(1))
+                print(f"Found year from last releaseYear match: {year}")
                 return year
 
-            # Try another pattern: "year": YYYY
+            # Priority 4: Try pattern: "productionYear": YYYY
+            match = re.search(r'"productionYear":\s*(\d{4})', html)
+            if match:
+                year = int(match.group(1))
+                print(f"Found year from productionYear: {year}")
+                return year
+
+            # Priority 5: Try meta tags
+            match = re.search(r'<meta\s+property="og:title"\s+content="[^"]*\((\d{4})\)"', html)
+            if match:
+                year = int(match.group(1))
+                print(f"Found year from og:title: {year}")
+                return year
+
+            # Priority 6: "year" pattern (generic, lower priority because can match currency data)
+            # Only use if no other patterns matched
             match = re.search(r'"year":\s*(\d{4})', html)
             if match:
                 year = int(match.group(1))
-                print(f"Found year from JSON (alt): {year}")
+                print(f"Found year from generic year field: {year}")
                 return year
 
             return None
         except Exception as e:
             print(f"Year extraction error: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def _extract_poster(self, html, title_id=None):
@@ -398,6 +441,7 @@ class NetflixScraper:
 
         Uses year information from Netflix metadata for accurate matching
         when multiple titles with the same name exist on IMDb.
+        Also extracts correct year from IMDb if not available from Netflix.
 
         :return: Poster URL from IMDb or None
         """
@@ -420,16 +464,30 @@ class NetflixScraper:
             else:
                 print(f"IMDb search: '{clean_title}'")
 
-            poster_url = self.poster_fetcher.fetch_poster(clean_title, year)
-            if poster_url:
+            # Get poster info using enhanced fetcher that also returns year
+            poster_info = self.poster_fetcher.get_poster_info(clean_title, year)
+            if poster_info:
+                poster_url = poster_info.get('poster_url')
+
+                # If IMDb provided a year and we don't have one from Netflix, cache it
+                if not year and poster_info.get('year'):
+                    imdb_year = poster_info.get('year')
+                    print(f"Extracted year {imdb_year} from IMDb")
+                    self._cached_year = imdb_year
+                    year = imdb_year
+
                 if year:
                     print(f"Found correct poster for '{title}' ({year}) from IMDb")
                 else:
                     print(f"Found poster for '{title}' from IMDb")
 
-            return poster_url
+                return poster_url
+
+            return None
         except Exception as e:
             print(f"IMDb poster fetch failed: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def _extract_from_json(self, html, result, title_id):
@@ -474,4 +532,108 @@ class NetflixScraper:
         except Exception as e:
             print(f"JSON extraction error: {e}")
             return False
+
+    def _extract_availability(self, html, result):
+        """Extract availability status and coming date from HTML
+
+        Detects if content is currently available or coming soon.
+        Updates result dictionary with:
+        - is_available: bool
+        - availability_status: str (e.g., 'Available', 'Coming Soon')
+        - coming_date: str or None (formatted date if coming soon)
+        """
+        try:
+            # Look for "Coming Soon" patterns
+            coming_patterns = [
+                r'coming\s+soon',
+                r'coming\s+([A-Za-z]+\s+\d+)',
+                r'join\s+us\s+on\s+(\w+\s+\d+)',
+                r'streaming\s+from\s+([A-Za-z]+\s+\d+)',
+                r'available\s+([A-Za-z]+\s+\d+)',
+                r'arrives?\s+([A-Za-z]+\s+\d+)',
+            ]
+
+            html_lower = html.lower()
+
+            # Check for coming soon indicators
+            for pattern in coming_patterns:
+                match = re.search(pattern, html_lower, re.IGNORECASE)
+                if match:
+                    result['is_available'] = False
+                    result['availability_status'] = 'Coming Soon'
+
+                    # Try to extract the date
+                    if len(match.groups()) > 0:
+                        result['coming_date'] = match.group(1)
+                    else:
+                        # Look for date patterns near "coming soon"
+                        date_match = re.search(r'([A-Za-z]+\s+\d{1,2},?\s+\d{4})', html[max(0, match.start()-200):match.end()+200])
+                        if date_match:
+                            result['coming_date'] = date_match.group(1)
+                    break
+
+            # Look for "Available" or "Streaming Now" patterns
+            if result['is_available']:
+                available_patterns = [
+                    r'streaming\s+now',
+                    r'watch\s+now',
+                    r'available\s+now',
+                ]
+
+                for pattern in available_patterns:
+                    if re.search(pattern, html_lower, re.IGNORECASE):
+                        result['is_available'] = True
+                        result['availability_status'] = 'Available'
+                        break
+
+        except Exception as e:
+            print(f"Availability extraction error: {e}")
+            # Keep defaults: is_available=True, availability_status='Available'
+
+    def _extract_content_type(self, html, result):
+        """Extract content type (Movie vs. TV Series) from HTML
+
+        Updates result dictionary with:
+        - is_series: bool (True if TV Series, False if Movie)
+        """
+        try:
+            html_lower = html.lower()
+
+            # Look for series indicators
+            series_patterns = [
+                r'"type"\s*:\s*"series"',
+                r'"isshow"\s*:\s*true',
+                r'tvshow',
+                r'tv series',
+                r'seasons?',
+                r'episodes?',
+                r'"contenttype"\s*:\s*"series"',
+            ]
+
+            # Check for movie indicators (higher priority)
+            movie_patterns = [
+                r'"type"\s*:\s*"movie"',
+                r'"type"\s*:\s*"film"',
+                r'"isshow"\s*:\s*false',
+                r'"contenttype"\s*:\s*"movie"',
+            ]
+
+            # Check movie first
+            for pattern in movie_patterns:
+                if re.search(pattern, html, re.IGNORECASE):
+                    result['is_series'] = False
+                    return
+
+            # Then check for series
+            for pattern in series_patterns:
+                if re.search(pattern, html, re.IGNORECASE):
+                    result['is_series'] = True
+                    return
+
+            # Default: assume Movie
+            result['is_series'] = False
+
+        except Exception as e:
+            print(f"Content type extraction error: {e}")
+            # Keep default: is_series=False
 

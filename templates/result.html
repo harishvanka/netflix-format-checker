@@ -28,16 +28,26 @@
         <div class="header">
           <div>
             <h1>{{ data.title or ('Title ID: ' + data.id) }}</h1>
-          </div>
-          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-            {% if data.max_resolution_label %}
-            <div class="pill ok">{{ data.max_resolution_label }}</div>
+            {% if data.availability_status %}
+            <div class="availability-badge {% if data.is_available %}available{% else %}unavailable{% endif %}">
+              {{ 'Movie' if not data.is_series else 'TV Show' }} • {{ data.availability_status }}
+            </div>
             {% endif %}
-            <div class="pill {% if data.dolby_vision %}ok{% else %}bad{% endif %}">Dolby Vision: {{ 'Yes' if data.dolby_vision else 'No' }}</div>
-            <div class="pill {% if data.hdr %}ok{% else %}bad{% endif %}">HDR10: {{ 'Yes' if data.hdr else 'No' }}</div>
-            <div class="pill {% if data.atmos %}ok{% else %}bad{% endif %}">Dolby Atmos: {{ 'Yes' if data.atmos else 'No' }}</div>
           </div>
         </div>
+
+        {% if not data.is_available and data.coming_date %}
+        <div class="coming-soon-notice">
+          <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <div>
+            <div class="coming-soon-title">Coming Soon</div>
+            <div class="coming-soon-date">Available from {{ data.coming_date }}</div>
+          </div>
+        </div>
+        {% endif %}
 
         <div class="meta">
           <div>
@@ -50,11 +60,69 @@
             <div class="value">{{ data.year }}</div>
           </div>
           {% endif %}
+          {% if data.is_available %}
           <div>
-            <div class="label">Resolution</div>
+            <div class="label">Max Resolution</div>
             <div class="value">{{ data.max_resolution_label or '—' }}</div>
           </div>
+          {% endif %}
         </div>
+
+        {% if data.is_available %}
+        <h3 style="margin-top: 2rem;">Playback Availability</h3>
+        <div class="playback-container">
+          <div class="playback-chips">
+            {% if data.uhd %}
+            <div class="format-chip format-chip-resolution">
+              <img class="format-icon-img" src="{{ url_for('static', filename='images/4k-uhd.png') }}" alt="4K UHD">
+              <span>UHD (4K)</span>
+            </div>
+            {% endif %}
+
+            {% if data.hd %}
+            <div class="format-chip format-chip-resolution">
+              <img class="format-icon-img" src="{{ url_for('static', filename='images/fullhd.png') }}" alt="Full HD">
+              <span>FHD (1080p)</span>
+            </div>
+            {% endif %}
+
+            {% if data.hdr %}
+            <div class="format-chip format-chip-hdr">
+              <img class="format-icon-img" src="{{ url_for('static', filename='images/hdr10.png') }}" alt="HDR10">
+              <span>HDR10</span>
+            </div>
+            {% endif %}
+
+            {% if data.dolby_vision %}
+            <div class="format-chip format-chip-dolby-vision">
+              <img class="format-icon-img" src="{{ url_for('static', filename='images/dolby-vision.png') }}" alt="Dolby Vision">
+              <span>Dolby Vision</span>
+            </div>
+            {% endif %}
+
+            {% if data.atmos %}
+            <div class="format-chip format-chip-atmos">
+              <img class="format-icon-img" src="{{ url_for('static', filename='images/dolby-atmos.png') }}" alt="Dolby Atmos">
+              <span>Dolby Atmos</span>
+            </div>
+            {% endif %}
+
+            {% if data.dolby_digital %}
+            <div class="format-chip format-chip-dolby-digital">
+              <img class="format-icon-img" src="{{ url_for('static', filename='images/dolby-digital-5-1.png') }}" alt="5.1 Dolby Digital">
+              <span>5.1 Dolby</span>
+            </div>
+            {% endif %}
+
+            {% if data.spatial_audio %}
+            <div class="format-chip format-chip-spatial-audio">
+              <img class="format-icon-img" src="{{ url_for('static', filename='images/spatial-audio.png') }}" alt="Spatial Audio">
+              <span>Spatial Audio</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
 
         <h3>Title Info</h3>
         <div class="summary summary-grid">
