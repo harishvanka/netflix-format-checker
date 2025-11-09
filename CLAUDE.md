@@ -2,11 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Latest Session Update (November 9, 2025)
+## Latest Session Update (November 9, 2025 - SDR Logic Fix)
 
 ✅ **APPLICATION STATUS: PRODUCTION READY**
 
 Recent improvements completed:
+- Fixed SDR (Standard Dynamic Range) logic to be mutually exclusive with HDR
+  - When HDR10 or Dolby Vision detected: SDR = False
+  - When no HDR formats detected: SDR = True (default for standard content)
+  - Applied fix to both JSON extraction path and fallback text pattern matching path
+  - Verified with test cases: Telusu Kada (SDR=True), The Witcher (SDR=False)
 - Fixed syntax warning in poster_fetcher.py (docstring raw string)
 - Verified all features working correctly:
   - Year extraction for collections (Don 2022 issue fixed)
@@ -18,7 +23,7 @@ Recent improvements completed:
 - All Flask routes tested and working (GET /, GET /health, POST /lookup)
 - Created documentation: docs/APP_STATUS.md, docs/SESSION_COMPLETION.md
 
-**Next Action**: Test with actual Netflix titles (especially Don ID 81588444)
+**Status**: All features tested and working correctly
 
 ---
 
@@ -256,11 +261,17 @@ NETFLIX_ESN = "NFCDCH-02-YOUR_ACTUAL_ESN"
    - IMDb approach requires no API keys and retrieves Amazon CDN URLs reliably
    - Ensures users always see a poster image when available
 
-5. **Resolution Classification**: Convert raw resolutions (3840x2160) to user-friendly labels (UHD/4K) based on height thresholds. Classification supports UHD (≥2160p), QHD (≥1440p), FHD (≥1080p), HD (≥720p), and SD (≥480p).
+5. **SDR/HDR Mutual Exclusivity**: SDR (Standard Dynamic Range) and HDR are mutually exclusive - content is in either SDR or HDR format, never both:
+   - If HDR10 OR Dolby Vision detected → SDR = False
+   - If NO HDR formats detected → SDR = True (default for standard content)
+   - Applied in both JSON extraction and fallback text pattern matching paths
+   - Ensures logically correct format representation
 
-6. **Cookie-Based Authentication**: Both apps use Netflix cookies for authentication. No need for complex OAuth or API keys—just login in browser and export cookies.
+6. **Resolution Classification**: Convert raw resolutions (3840x2160) to user-friendly labels (UHD/4K) based on height thresholds. Classification supports UHD (≥2160p), QHD (≥1440p), FHD (≥1080p), HD (≥720p), and SD (≥480p).
 
-7. **MSL Protocol (Advanced)**: For `app_msl.py`, implement MSL with RSA key exchange and AES encryption for authenticated manifest requests. Cache keys 10 hours to reduce overhead.
+7. **Cookie-Based Authentication**: Both apps use Netflix cookies for authentication. No need for complex OAuth or API keys—just login in browser and export cookies.
+
+8. **MSL Protocol (Advanced)**: For `app_msl.py`, implement MSL with RSA key exchange and AES encryption for authenticated manifest requests. Cache keys 10 hours to reduce overhead.
 
 ## Troubleshooting
 
