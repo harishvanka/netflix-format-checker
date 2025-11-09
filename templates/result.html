@@ -27,7 +27,12 @@
       <div class="content">
         <div class="header">
           <div>
-            <h1>{{ data.title or ('Title ID: ' + data.id) }}</h1>
+            <div style="display: flex; align-items: baseline; gap: 1rem;">
+              <h1 style="margin: 0;">{{ data.title or ('Title ID: ' + data.id) }}</h1>
+              {% if data.year %}
+              <span style="color: var(--text-muted); font-size: 0.95rem;">({{ data.year }})</span>
+              {% endif %}
+            </div>
             {% if data.availability_status %}
             <div class="availability-badge {% if data.is_available %}available{% else %}unavailable{% endif %}">
               {{ 'Movie' if not data.is_series else 'TV Show' }} • {{ data.availability_status }}
@@ -54,16 +59,10 @@
             <div class="label">Title ID</div>
             <div class="value">{{ data.id }}</div>
           </div>
-          {% if data.year %}
+          {% if not data.is_available and data.coming_date %}
           <div>
-            <div class="label">Release Year</div>
-            <div class="value">{{ data.year }}</div>
-          </div>
-          {% endif %}
-          {% if data.is_available %}
-          <div>
-            <div class="label">Max Resolution</div>
-            <div class="value">{{ data.max_resolution_label or '—' }}</div>
+            <div class="label">Streaming From</div>
+            <div class="value">{{ data.coming_date }}</div>
           </div>
           {% endif %}
         </div>
@@ -133,10 +132,6 @@
 
         <h3>Title Info</h3>
         <div class="summary summary-grid">
-          <div class="kv">
-            <span class="k">{{ data.max_resolution_label or 'Resolution' }}</span>
-            <span class="v"><span class="val-badge val-{% if data.max_resolution_label %}true{% else %}false{% endif %}">{{ 'True' if data.max_resolution_label else 'False' }}</span></span>
-          </div>
           <div class="kv">
             <span class="k">HD</span>
             <span class="v"><span class="val-badge val-{% if data.hdr or data.uhd %}true{% else %}false{% endif %}">{{ 'True' if data.hdr or data.uhd else 'False' }}</span></span>
