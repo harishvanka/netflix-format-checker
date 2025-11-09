@@ -86,9 +86,9 @@
             </div>
             {% endif %}
 
-            {% if data.sd %}
+            {% if data.sdr %}
             <div class="format-chip format-chip-resolution">
-              <img class="format-icon-img" src="{{ url_for('static', filename='images/sd.png') }}" alt="SDR">
+              <img class="format-icon-img" src="{{ url_for('static', filename='images/sdr.png') }}" alt="SDR">
               <span>SDR (Standard Dynamic Range)</span>
             </div>
             {% endif %}
@@ -143,7 +143,7 @@
           </div>
           <div class="kv">
             <span class="k">SDR (Standard Dynamic Range)</span>
-            <span class="v"><span class="val-badge val-{% if data.sd %}true{% else %}false{% endif %}">{{ 'True' if data.sd else 'False' }}</span></span>
+            <span class="v"><span class="val-badge val-{% if data.sdr %}true{% else %}false{% endif %}">{{ 'True' if data.sdr else 'False' }}</span></span>
           </div>
           <div class="kv">
             <span class="k">Dolby Vision</span>

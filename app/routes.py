@@ -126,7 +126,7 @@ def lookup():
             'dolby_vision': analysis.get('dolby_vision', False),
             'hdr': analysis.get('hdr10', False),
             'hd': analysis.get('hd', False),
-            'sd': analysis.get('sd', False),
+            'sdr': analysis.get('sdr', False),
             'atmos': analysis.get('atmos', False),
             'dolby_digital': analysis.get('dolby_digital', False),
             'spatial_audio': analysis.get('spatial_audio', False),

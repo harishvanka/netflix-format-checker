@@ -63,7 +63,7 @@ class NetflixScraper:
             'uhd': False,
             '4k': False,
             'hd': False,
-            'sd': False,
+            'sdr': False,
             'is_available': True,
             'availability_status': 'Available',
             'coming_date': None,
@@ -155,10 +155,10 @@ class NetflixScraper:
                 # If no HDR formats detected, default to SDR being available
                 has_hdr = result['hdr10'] or result['dolby_vision']
                 if has_hdr:
-                    result['sd'] = False  # HDR means no SDR
+                    result['sdr'] = False  # HDR means no SDR
                 else:
                     # No HDR detected, so SDR should be True (default for standard content)
-                    result['sd'] = True
+                    result['sdr'] = True
 
 
             print(f"Detection results: DV={result['dolby_vision']}, HDR={result['hdr10']}, Atmos={result['atmos']}, 4K={result['uhd']}")
@@ -536,12 +536,12 @@ class NetflixScraper:
                         # If it has no HDR formats, then SDR should be True (default assumption for standard content)
                         has_hdr = result['hdr10'] or result['dolby_vision']
                         if has_hdr:
-                            result['sd'] = False  # HDR means no SDR
+                            result['sdr'] = False  # HDR means no SDR
                         else:
                             # No HDR detected, so default SDR to True (override Netflix's potentially unreliable hasSD)
-                            result['sd'] = True
+                            result['sdr'] = True
 
-                        print(f"Found delivery data: UHD={result['uhd']}, HD={result['hd']}, SD={result['sd']}, DV={result['dolby_vision']}, HDR={result['hdr10']}, Atmos={result['atmos']}, Spatial={result['spatial_audio']}, 5.1={result['dolby_digital']}")
+                        print(f"Found delivery data: UHD={result['uhd']}, HD={result['hd']}, SDR={result['sdr']}, DV={result['dolby_vision']}, HDR={result['hdr10']}, Atmos={result['atmos']}, Spatial={result['spatial_audio']}, 5.1={result['dolby_digital']}")
                         return True
 
                 except json.JSONDecodeError:
