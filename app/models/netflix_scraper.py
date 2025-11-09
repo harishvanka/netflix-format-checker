@@ -151,6 +151,15 @@ class NetflixScraper:
                 ]
                 result['atmos'] = any(pattern in html_lower for pattern in atmos_patterns)
 
+                # SDR (Standard Dynamic Range) detection - mutually exclusive with HDR
+                # If no HDR formats detected, default to SDR being available
+                has_hdr = result['hdr10'] or result['dolby_vision']
+                if has_hdr:
+                    result['sd'] = False  # HDR means no SDR
+                else:
+                    # No HDR detected, so SDR should be True (default for standard content)
+                    result['sd'] = True
+
 
             print(f"Detection results: DV={result['dolby_vision']}, HDR={result['hdr10']}, Atmos={result['atmos']}, 4K={result['uhd']}")
 
@@ -516,12 +525,21 @@ class NetflixScraper:
                         result['uhd'] = delivery.get('hasUltraHD', False)
                         result['4k'] = result['uhd']
                         result['hd'] = delivery.get('hasHD', False)
-                        result['sd'] = delivery.get('hasSD', False)
                         result['dolby_vision'] = delivery.get('hasDolbyVision', False)
                         result['hdr10'] = delivery.get('hasHDR', False)
                         result['atmos'] = delivery.get('hasDolbyAtmos', False)
                         result['spatial_audio'] = delivery.get('hasAudioSpatial', False)
                         result['dolby_digital'] = delivery.get('has51Audio', False)
+
+                        # SDR (Standard Dynamic Range) and HDR are mutually exclusive
+                        # If the title has any HDR format, it should NOT have SDR
+                        # If it has no HDR formats, then SDR should be True (default assumption for standard content)
+                        has_hdr = result['hdr10'] or result['dolby_vision']
+                        if has_hdr:
+                            result['sd'] = False  # HDR means no SDR
+                        else:
+                            # No HDR detected, so default SDR to True (override Netflix's potentially unreliable hasSD)
+                            result['sd'] = True
 
                         print(f"Found delivery data: UHD={result['uhd']}, HD={result['hd']}, SD={result['sd']}, DV={result['dolby_vision']}, HDR={result['hdr10']}, Atmos={result['atmos']}, Spatial={result['spatial_audio']}, 5.1={result['dolby_digital']}")
                         return True

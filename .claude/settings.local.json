@@ -11,7 +11,8 @@
       "Bash(python app_simple.py:*)",
       "Bash(python app.py:*)",
       "Bash(PORT=5002 python app.py:*)",
-      "Bash(python -m json.tool:*)"
+      "Bash(python -m json.tool:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
