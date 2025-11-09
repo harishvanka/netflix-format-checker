@@ -86,6 +86,13 @@
             </div>
             {% endif %}
 
+            {% if data.sd %}
+            <div class="format-chip format-chip-resolution">
+              <img class="format-icon-img" src="{{ url_for('static', filename='images/sd.png') }}" alt="SD">
+              <span>SD (480p)</span>
+            </div>
+            {% endif %}
+
             {% if data.hdr %}
             <div class="format-chip format-chip-hdr">
               <img class="format-icon-img" src="{{ url_for('static', filename='images/hdr10.png') }}" alt="HDR10">

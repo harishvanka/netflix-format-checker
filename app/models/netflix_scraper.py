@@ -63,6 +63,7 @@ class NetflixScraper:
             'uhd': False,
             '4k': False,
             'hd': False,
+            'sd': False,
             'is_available': True,
             'availability_status': 'Available',
             'coming_date': None,
@@ -515,13 +516,14 @@ class NetflixScraper:
                         result['uhd'] = delivery.get('hasUltraHD', False)
                         result['4k'] = result['uhd']
                         result['hd'] = delivery.get('hasHD', False)
+                        result['sd'] = delivery.get('hasSD', False)
                         result['dolby_vision'] = delivery.get('hasDolbyVision', False)
                         result['hdr10'] = delivery.get('hasHDR', False)
                         result['atmos'] = delivery.get('hasDolbyAtmos', False)
                         result['spatial_audio'] = delivery.get('hasAudioSpatial', False)
                         result['dolby_digital'] = delivery.get('has51Audio', False)
 
-                        print(f"Found delivery data: UHD={result['uhd']}, DV={result['dolby_vision']}, HDR={result['hdr10']}, Atmos={result['atmos']}, Spatial={result['spatial_audio']}, 5.1={result['dolby_digital']}")
+                        print(f"Found delivery data: UHD={result['uhd']}, HD={result['hd']}, SD={result['sd']}, DV={result['dolby_vision']}, HDR={result['hdr10']}, Atmos={result['atmos']}, Spatial={result['spatial_audio']}, 5.1={result['dolby_digital']}")
                         return True
 
                 except json.JSONDecodeError:
