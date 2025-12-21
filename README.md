@@ -124,6 +124,40 @@ To exit: Use `deactivate` to close virtual environment
 curl -X POST http://127.0.0.1:5001/lookup -d "url=81215567"
 ```
 
+### uNoGS Prototype (Coming / Leaving detection)
+
+You can use the included prototype script to query uNoGS (via RapidAPI) for titles that are coming soon or leaving soon in India.
+
+Prerequisites:
+- Sign up on RapidAPI and subscribe to the `uNoGS` (unogsng) API; copy your `x-rapidapi-key` to `RAPIDAPI_KEY`.
+- (Optional) Create a TMDB API key and set `TMDB_API_KEY` to enrich results with spoken languages.
+
+Usage (examples):
+```bash
+# Find titles coming in the next 30 days (India)
+python scripts/unogs_prototype.py --mode coming --days 30
+
+# Find titles leaving in the next 30 days, enriched with TMDB for language filtering
+TMDB_API_KEY=xxxxx python scripts/unogs_prototype.py --mode leaving --enrich --languages hi,ta,te,ml
+```
+
+Notes:
+- The script uses `RAPIDAPI_KEY` and optional `TMDB_API_KEY` from environment variables. See `.env.example` for placeholders.
+- This is a prototype: aggregator API parameter names may vary. If you subscribe to uNoGS on RapidAPI, test endpoints in the RapidAPI console and adjust parameters in `scripts/unogs_prototype.py` as needed.
+
+### HTTP Endpoint & UI
+
+There is a small HTTP endpoint and UI to explore results in the browser:
+
+- JSON endpoint: `GET /unogs/?mode=coming|leaving&days=30&languages=hi,ta,te,ml&enrich=1`
+   - Returns: `{ count: n, results: [...] }`
+- UI: `GET /unogs/ui` — a simple page that calls the JSON endpoint and displays a table of titles.
+
+Notes:
+- Set `TMDB_API_KEY` when using `enrich=1` in order to fetch spoken language metadata from TMDB.
+- The UI is intentionally minimal and designed for quick human review. It shows title, start/end dates and spoken languages.
+
+
 ## Technical Details
 
 ### Architecture

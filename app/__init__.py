@@ -21,6 +21,14 @@ def create_app():
     from app.routes import bp
     app.register_blueprint(bp)
 
+    # Register uNoGS routes (JSON + UI)
+    try:
+        from app.routes.unogs import bp as unogs_bp
+        app.register_blueprint(unogs_bp)
+    except Exception:
+        # Keep the app working even if the uNoGS blueprint fails to import
+        pass
+
     # Add after_request handler
     @app.after_request
     def after_request(response):
